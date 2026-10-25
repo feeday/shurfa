@@ -19,7 +19,7 @@
 
 ## GitHub 自动生成 APK
 
-1. 在 GitHub 新建仓库（例如 `android-ime`），提交本目录全部文件。注意包含 `.github/workflows/android.yml`。
+1. 打开本仓库的 [Actions 页面](https://github.com/feeday/shurfa/actions)。
 2. 进入仓库 **Actions → Build Android APK**，等待构建成功。
 3. 下载 **Artifacts → QingyuIME-debug**，解压得到 `app-debug.apk`。
 4. 安装 APK，打开“轻语输入法”，依次启用、切换、试打。
@@ -52,7 +52,9 @@ shi 是 时 事 十
 
 ## 验证状态
 
-交付环境缺少 Android SDK 和 Gradle，未完成 APK 编译、JUnit 执行或实机验证。已通过 JDK 17 编译并实际运行拼音引擎的 9 项独立检查（包含逐段选词、大小写、ü、重复词条与未知输入），并通过全部 Java 文件语法解析、XML / YAML 结构及 486 个拼音条目、1,377 个候选字词的格式检查。附有 JUnit 测试、自动构建配置和下面的实机检查表。以上不代表 Android 应用已成功编译或通过实机验证。
+2026-10-25：GitHub Actions 已通过 `testDebugUnitTest`、`lintDebug` 和 `assembleDebug`，测试 APK 已上传至构建产物。对应代码提交：`5bc5cfd758d70fa0def1252d7cfa21c2f0ef4685`。可在[本次构建](https://github.com/feeday/shurfa/actions/runs/40181374565)下载 `QingyuIME-debug`。
+
+本地还通过了拼音引擎的 9 项独立运行检查与词库格式检查（486 个拼音条目、1,377 个候选字词）。尚未完成手机实机验证，基础词库不支持成熟输入法的完整整句联想。
 
 ## 实机检查表
 
