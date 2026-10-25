@@ -26,7 +26,11 @@ public final class PinyinEngine {
                 if (line.trim().isEmpty() || line.startsWith("#")) continue;
                 String[] parts = line.trim().split("\\s+");
                 if (parts.length < 2) continue;
-                List<String> values = words.computeIfAbsent(parts[0], k -> new ArrayList<>());
+                List<String> values = words.get(parts[0]);
+                if (values == null) {
+                    values = new ArrayList<>();
+                    words.put(parts[0], values);
+                }
                 for (int i = 1; i < parts.length; i++) if (!values.contains(parts[i])) values.add(parts[i]);
             }
         }
