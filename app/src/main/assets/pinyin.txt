@@ -1,0 +1,487 @@
+# Original small starter dictionary. pinyin candidate1 candidate2 ...
+a 啊 阿 呀
+ai 爱 矮 挨 哎
+an 安 按 案 暗
+ang 昂
+ao 奥 熬 傲
+ba 吧 把 八 爸 巴
+bai 白 百 摆 败
+ban 半 办 班 板 般
+bang 帮 棒 绑 榜
+bao 包 报 保 宝 饱
+bei 被 北 杯 背 倍
+ben 本 笨 奔
+beng 蹦 崩
+bi 比 笔 必 毕 币
+bian 边 变 遍 便 编
+biao 表 标
+bie 别
+bin 宾 彬
+bing 并 病 冰 兵
+bo 波 播 博 拨
+bu 不 部 步 布 补
+ca 擦
+cai 才 菜 彩 财 猜
+can 参 餐 残
+cang 藏 仓
+cao 草 操
+ce 测 侧 册
+ceng 曾 层
+cha 查 茶 差 插
+chai 拆 柴
+chan 产 缠
+chang 长 常 场 唱 厂
+chao 超 朝 炒 吵
+che 车 撤
+chen 陈 晨 沉
+cheng 成 城 程 称 诚
+chi 吃 持 尺 迟
+chong 冲 充 重 虫
+chou 抽 丑 愁
+chu 出 处 初 除 楚
+chuai 揣
+chuan 传 船 穿 串
+chuang 窗 床 创
+chui 吹 垂
+chun 春 纯
+chuo 戳
+ci 次 此 词 辞
+cong 从 聪 丛
+cou 凑
+cu 粗 醋
+cuan 窜
+cui 催 脆 翠
+cun 村 存 寸
+cuo 错 措
+da 大 打 达 答
+dai 带 代 待 戴
+dan 但 单 蛋 淡
+dang 当 党 档
+dao 到 道 倒 刀 导
+de 的 得 地
+dei 得
+deng 等 灯 登
+di 地 第 低 底 弟
+dian 点 电 店 典
+diao 掉 调 钓
+die 跌 叠 爹
+ding 定 顶 订
+diu 丢
+dong 动 东 懂 冬
+dou 都 豆 斗
+du 读 度 独 毒
+duan 段 短 断
+dui 对 队 堆
+dun 顿 蹲 吨
+duo 多 朵 夺
+e 呃 饿 额 恶
+en 嗯
+er 而 二 儿 耳
+fa 发 法 罚
+fan 饭 反 翻 凡 烦
+fang 放 方 房 防
+fei 非 飞 费 肥
+fen 分 份 粉 奋
+feng 风 封 峰 丰
+fo 佛
+fou 否
+fu 服 付 副 富 福 父
+ga 嘎
+gai 该 改 盖
+gan 干 感 敢 赶
+gang 刚 港 钢 岗
+gao 高 告 搞 稿
+ge 个 各 哥 歌 格
+gei 给
+gen 跟 根
+geng 更 耕
+gong 工 公 共 功 供
+gou 够 狗 购
+gu 古 股 故 顾 鼓
+gua 挂 刮 瓜
+guai 怪 乖
+guan 关 管 观 馆
+guang 光 广 逛
+gui 贵 归 规 鬼
+gun 滚 棍
+guo 过 国 果 锅
+ha 哈
+hai 还 海 孩 害
+han 汉 含 汗 寒
+hang 行 航 杭
+hao 好 号 浩 豪
+he 和 喝 合 河 何
+hei 黑 嘿
+hen 很 狠 恨
+heng 横 衡 哼
+hong 红 洪 宏
+hou 后 候 厚 猴
+hu 胡 湖 户 虎 互
+hua 话 花 化 画 华
+huai 坏 怀
+huan 换 还 欢 环
+huang 黄 慌 皇
+hui 会 回 灰 挥 辉
+hun 混 婚 魂
+huo 或 活 火 货 获
+ji 机 几 及 即 记 级 极 鸡 集
+jia 家 加 假 价 甲
+jian 见 件 间 建 简 检 键
+jiang 将 讲 江 奖
+jiao 叫 教 交 角 脚
+jie 接 节 解 界 姐 借
+jin 今 进 近 金 尽 紧
+jing 经 京 精 静 景 惊
+jiong 囧 炯
+jiu 就 九 久 酒 旧
+ju 局 句 据 举 具 居
+juan 卷 捐
+jue 觉 决 绝
+jun 军 君 均
+ka 卡 咖
+kai 开 凯
+kan 看 刊 砍
+kang 康 抗
+kao 考 靠 烤
+ke 可 课 客 科 刻
+ken 肯
+keng 坑
+kong 空 控 孔
+kou 口 扣
+ku 苦 酷 库 哭
+kua 跨 夸
+kuai 快 块
+kuan 宽 款
+kuang 狂 矿 框
+kui 亏 愧
+kun 困 昆
+kuo 扩 括 阔
+la 啦 拉 辣
+lai 来 赖
+lan 蓝 懒 栏 烂
+lang 浪 狼 朗
+lao 老 劳 牢
+le 了 乐
+lei 类 累 泪 雷
+leng 冷
+li 里 理 力 利 李 离 立 礼
+lia 俩
+lian 连 脸 联 练
+liang 两 量 亮 凉
+liao 聊 了 料 疗
+lie 列 烈
+lin 林 临 邻
+ling 零 另 领 灵 令
+liu 六 流 留 刘
+long 龙 隆 笼
+lou 楼 漏
+lu 路 录 陆 露
+luan 乱 卵
+lun 轮 论
+luo 落 罗 络
+lv 绿 旅 律 吕
+lve 略 掠
+ma 吗 妈 马 嘛 码
+mai 买 卖 麦
+man 慢 满 蛮
+mang 忙 芒 盲
+mao 猫 毛 帽 冒
+me 么
+mei 没 每 美 妹
+men 们 门 闷
+meng 梦 猛 萌
+mi 米 密 迷 秘
+mian 面 免 棉
+miao 秒 苗 妙 喵
+mie 灭
+min 民 敏
+ming 名 明 命
+miu 谬
+mo 摸 末 莫 模 墨
+mou 某 谋
+mu 木 目 母 幕
+na 那 拿 哪
+nai 奶 耐
+nan 难 男 南
+nang 囊
+nao 脑 闹
+ne 呢
+nei 内
+nen 嫩
+neng 能
+ni 你 尼 泥
+nian 年 念 粘
+niang 娘
+niao 鸟 尿
+nie 捏 聂
+nin 您
+ning 宁 凝
+niu 牛 扭
+nong 弄 农 浓
+nu 怒 努
+nuan 暖
+nuo 诺 挪
+nv 女
+nve 虐
+ou 欧 偶 哦
+pa 怕 爬 啪
+pai 拍 排 牌
+pan 盘 判 盼
+pang 旁 胖
+pao 跑 泡 抛
+pei 陪 配 赔
+pen 喷 盆
+peng 朋 碰 棚
+pi 批 皮 匹
+pian 片 篇 骗
+piao 票 飘 漂
+pie 撇
+pin 品 拼 频
+ping 平 屏 评 瓶
+po 破 坡 婆
+pou 剖
+pu 普 铺 谱
+qi 起 其 七 气 期 器 齐
+qia 恰 卡
+qian 钱 前 千 签 浅
+qiang 强 墙 抢
+qiao 桥 巧 敲
+qie 且 切
+qin 亲 琴 勤
+qing 请 清 情 轻 青 庆
+qiong 穷
+qiu 求 球 秋
+qu 去 取 区 曲 趣
+quan 全 权 圈 泉
+que 却 确 缺
+qun 群 裙
+ran 然 染
+rang 让 嚷
+rao 绕 扰
+re 热 惹
+ren 人 任 认 仁
+reng 仍 扔
+ri 日
+rong 容 荣 融
+rou 肉 柔
+ru 如 入 乳
+ruan 软
+rui 锐 瑞
+run 润
+ruo 若 弱
+sa 撒 洒
+sai 赛 塞
+san 三 散 伞
+sang 丧 桑
+sao 扫 骚
+se 色 涩
+sen 森
+seng 僧
+sha 啥 杀 沙 傻
+shai 晒 筛
+shan 山 闪 善 删
+shang 上 商 伤 赏
+shao 少 烧 稍
+she 设 社 舍 射
+shei 谁
+shen 什 深 身 神 甚
+sheng 生 声 省 升 胜
+shi 是 时 事 十 使 世 式 试 市 师
+shou 手 收 首 受 瘦
+shu 书 数 输 树 属 熟
+shua 刷 耍
+shuai 帅 摔 甩
+shuan 栓 拴
+shuang 双 爽
+shui 水 谁 睡
+shun 顺 瞬
+shuo 说 硕
+si 四 思 死 司 丝
+song 送 松 宋
+sou 搜 艘
+su 素 速 苏 酥
+suan 算 酸
+sui 岁 随 碎
+sun 孙 损
+suo 所 索 锁
+ta 他 她 它 塔
+tai 太 台 态 抬
+tan 谈 弹 探 坦
+tang 糖 汤 躺 堂
+tao 套 讨 桃 逃
+te 特
+teng 疼 腾
+ti 题 提 体 替
+tian 天 田 填 甜
+tiao 条 调 跳
+tie 贴 铁
+ting 听 停 挺 厅
+tong 同 通 痛 童
+tou 头 投 偷
+tu 图 土 兔 吐
+tuan 团
+tui 推 退 腿
+tun 吞 屯
+tuo 拖 脱 托
+wa 哇 娃 挖
+wai 外 歪
+wan 玩 完 万 晚 碗
+wang 王 网 忘 往 望
+wei 为 位 未 味 喂 微
+wen 问 文 闻 温 稳
+weng 翁
+wo 我 窝 握
+wu 无 五 物 午 屋 务
+xi 系 西 喜 细 洗 希 息
+xia 下 夏 吓 虾
+xian 先 现 线 县 闲 显
+xiang 想 向 像 相 香 项
+xiao 小 笑 校 消 晓
+xie 写 些 谢 鞋 协
+xin 新 心 信 辛
+xing 行 性 星 型 姓 醒
+xiong 兄 熊 胸
+xiu 修 休 秀
+xu 需 许 续 虚 序
+xuan 选 宣 旋
+xue 学 雪 血
+xun 训 寻 讯 询
+ya 呀 压 牙 鸭
+yan 眼 言 研 烟 颜
+yang 样 养 羊 阳
+yao 要 药 摇 咬
+ye 也 夜 页 业 叶
+yi 一 以 已 意 义 易 衣 医
+yin 因 音 引 银 印
+ying 应 影 英 硬 赢
+yo 哟
+yong 用 永 勇 拥
+you 有 又 由 友 游 右
+yu 与 于 语 雨 鱼 玉 预
+yuan 元 原 远 员 圆 愿
+yue 月 越 约 乐 阅
+yun 云 运 晕 允
+za 咋 杂 砸
+zai 在 再 载
+zan 咱 赞 暂
+zang 脏 藏
+zao 早 造 糟 躁
+ze 则 责 泽
+zei 贼
+zen 怎
+zeng 增 曾 赠
+zha 炸 查 扎
+zhai 摘 宅 窄
+zhan 站 战 展 占
+zhang 张 长 章 账 涨
+zhao 找 照 招 赵
+zhe 这 着 者 折
+zhen 真 阵 针 镇
+zheng 正 整 证 政 争
+zhi 之 只 知 至 指 直 制 值 纸
+zhong 中 种 重 钟 终
+zhou 周 州 粥 轴
+zhu 主 住 注 猪 祝 逐
+zhua 抓 爪
+zhuai 拽
+zhuan 转 专 赚 砖
+zhuang 装 状 庄 撞
+zhui 追 坠
+zhun 准
+zhuo 桌 着 捉
+zi 子 自 字 资 紫
+zong 总 宗 综
+zou 走 奏
+zu 组 足 族 租
+zuan 钻
+zui 最 嘴 醉
+zun 尊 遵
+zuo 做 作 坐 左 座
+nihao 你好
+nihaoma 你好吗
+ninhao 您好
+xiexie 谢谢
+zaijian 再见
+zaoshanghao 早上好
+wanshanghao 晚上好
+wanan 晚安
+zaoan 早安
+duibuqi 对不起
+meiguanxi 没关系
+bukeqi 不客气
+meiwenti 没问题
+keyi 可以
+bukeyi 不可以
+haode 好的
+haoba 好吧
+zhidao 知道
+buzhidao 不知道
+woaini 我爱你
+women 我们
+nimen 你们
+tamen 他们 她们
+zhege 这个
+nage 那个
+shenme 什么
+weishenme 为什么
+zenme 怎么
+zenmeyang 怎么样
+xianzai 现在
+jintian 今天
+mingtian 明天
+zuotian 昨天
+zhongguo 中国
+zhongwen 中文
+yingwen 英文
+pinyin 拼音
+shurufa 输入法
+jianpan 键盘
+shouji 手机
+diannao 电脑
+wangluo 网络
+ruanjian 软件
+kaifa 开发
+daima 代码
+ceshi 测试
+chenggong 成功
+shibai 失败
+wenjian 文件
+baocun 保存
+shanchu 删除
+shezhi 设置
+anzhuo 安卓
+qingyu 轻语
+shijie 世界
+shijian 时间
+gongzuo 工作
+xuexi 学习
+shenghuo 生活
+pengyou 朋友
+jiaren 家人
+kaixin 开心
+gaoxing 高兴
+xihuan 喜欢
+chifan 吃饭
+shuijiao 睡觉
+shangban 上班
+xiaban 下班
+xuexiao 学校
+laoshi 老师
+xuesheng 学生
+beijing 北京
+shanghai 上海
+guangzhou 广州
+shenzhen 深圳
+hangzhou 杭州
+chengdu 成都
+shuru 输入
+shuchu 输出
+xiazai 下载
+shangchuan 上传
+lixian 离线
+anquan 安全
+yinsi 隐私
+wenben 文本
+fasong 发送
+sousuo 搜索
+wancheng 完成
