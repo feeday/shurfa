@@ -1,6 +1,16 @@
 package com.feeday.ime;
 
 import android.graphics.Color;
+import android.Manifest;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.os.SystemClock;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.content.res.Configuration;
 import android.util.TypedValue;
 import android.graphics.drawable.GradientDrawable;
@@ -19,6 +29,8 @@ import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ScrollView;
+import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +43,14 @@ public final class QingyuImeService extends InputMethodService {
     private HorizontalScrollView candidateScroll;
     private TextView composingLabel;
     private Button layoutToggle;
+    private Button voiceButton;
+    private String toolPanel = "";
+    private boolean selecting;
+    private int selectionEnd = -1;
+    private SpeechRecognizer recognizer;
+    private final VoiceSession voiceSession = new VoiceSession();
+    private String voiceStatus = "";
+    private final Runnable voiceTimeout = () -> { cancelVoice(); notifyUser("语音已超时，请重试"); };
     private KeyboardSizing sizing;
     private boolean nineKey, changingConfiguration;
     private int panelWidth;
@@ -91,7 +111,10 @@ public final class QingyuImeService extends InputMethodService {
         layoutToggle = key("", false);
         layoutToggle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
         layoutToggle.setOnClickListener(v -> toggleLayout());
-        header.addView(layoutToggle, new LinearLayout.LayoutParams(dp(92), -1));
+        header.addView(layoutToggle, new LinearLayout.LayoutParams(dp(80), -1));
+        voiceButton = headerButton("语音", 44, this::toggleVoice);
+        headerButton("剪贴板", 50, () -> openPanel("clipboard"));
+        headerButton("编辑", 42, () -> openPanel("edit"));
         candidateScroll = new HorizontalScrollView(this);
         candidateScroll.setHorizontalScrollBarEnabled(false);
         candidates = new LinearLayout(this);
@@ -113,6 +136,7 @@ public final class QingyuImeService extends InputMethodService {
 
     @Override public void onConfigurationChanged(Configuration config) {
         stopRepeat();
+        cancelVoice();
         changingConfiguration = true;
         try { super.onConfigurationChanged(config); }
         finally { changingConfiguration = false; }
@@ -122,6 +146,7 @@ public final class QingyuImeService extends InputMethodService {
     private boolean usingNineKey() { return nineKey && chinese && !symbols && !password; }
 
     private void toggleLayout() {
+        cancelVoice();
         commitRaw();
         nineKey = !nineKey;
         getSharedPreferences("keyboard", MODE_PRIVATE).edit().putBoolean("nineKey", nineKey).apply();
@@ -131,6 +156,10 @@ public final class QingyuImeService extends InputMethodService {
     @Override public void onStartInput(EditorInfo info, boolean restarting) {
         super.onStartInput(info, restarting);
         if (changingConfiguration && restarting) return;
+        cancelVoice();
+        toolPanel = "";
+        selecting = false;
+        selectionEnd = info.initialSelEnd;
         stopRepeat();
         composing = "";
         shifted = false;
@@ -150,6 +179,8 @@ public final class QingyuImeService extends InputMethodService {
 
     @Override public void onFinishInput() {
         if (changingConfiguration) return;
+        cancelVoice(); toolPanel = ""; selecting = false; selectionEnd = -1;
+        if (rows != null) drawKeys();
         stopRepeat(); composing = "";
         if (composingLabel != null) refreshCandidates();
         super.onFinishInput();
@@ -158,16 +189,20 @@ public final class QingyuImeService extends InputMethodService {
     @Override public void onFinishInputView(boolean finishingInput) {
         stopRepeat();
         if (changingConfiguration) return;
+        cancelVoice(); toolPanel = ""; selecting = false;
+        if (rows != null) drawKeys();
         // Finalize visible raw letters when the keyboard is hidden, never carry them to another field.
         commitRaw();
         super.onFinishInputView(finishingInput);
     }
 
-    @Override public void onDestroy() { stopRepeat(); super.onDestroy(); }
+    @Override public void onDestroy() { cancelVoice(); stopRepeat(); super.onDestroy(); }
 
     @Override public void onUpdateSelection(int oldStart, int oldEnd, int newStart,
             int newEnd, int candidatesStart, int candidatesEnd) {
         super.onUpdateSelection(oldStart, oldEnd, newStart, newEnd, candidatesStart, candidatesEnd);
+        selectionEnd = newEnd;
+        if (recognizer != null && (newStart != oldStart || newEnd != oldEnd)) cancelVoice();
         if (!composing.isEmpty() && (newStart != candidatesEnd || newEnd != candidatesEnd)) {
             composing = "";
             InputConnection ic = getCurrentInputConnection();
@@ -187,6 +222,14 @@ public final class QingyuImeService extends InputMethodService {
     }
     private void renderCandidates() {
         if (composingLabel == null) return;
+        if (recognizer != null) {
+            composingLabel.setText("语音 · " + voiceStatus);
+            candidates.removeAllViews();
+            Button cancel = key("取消语音", false);
+            cancel.setOnClickListener(v -> cancelVoice());
+            candidates.addView(cancel, new LinearLayout.LayoutParams(dp(100), -1));
+            return;
+        }
         composingLabel.setText(composing.isEmpty()
             ? (password ? "轻语 · 密码模式" : (!dictionaryAvailable ? "词库不可用 · 英文输入" : (chinese ? (usingNineKey() ? "轻语 · 九宫格" : "轻语 · 全键拼音") : "轻语 · English")))
             : composing + "  · 点击输入原文");
@@ -232,6 +275,7 @@ public final class QingyuImeService extends InputMethodService {
         candidates.addView(b, new LinearLayout.LayoutParams(-2, -1));
     }
     private void typeT9(String digit) {
+        cancelVoice(); selecting = false;
         InputConnection ic = getCurrentInputConnection();
         if (ic == null || !usingNineKey()) return;
         if (composing.length() >= 64) commitRaw();
@@ -257,6 +301,7 @@ public final class QingyuImeService extends InputMethodService {
         composing = ""; refreshCandidates();
     }
     private void type(String value) {
+        cancelVoice(); selecting = false;
         InputConnection ic = getCurrentInputConnection();
         if (ic == null) return;
         if (chinese && dictionaryAvailable && !symbols && !password && value.matches("[a-z]")) {
@@ -267,6 +312,7 @@ public final class QingyuImeService extends InputMethodService {
         } else { commitRaw(); ic.commitText(value, 1); }
     }
     private void backspace() {
+        cancelVoice(); selecting = false;
         InputConnection ic = getCurrentInputConnection();
         if (ic == null) return;
         if (!composing.isEmpty()) {
@@ -287,12 +333,14 @@ public final class QingyuImeService extends InputMethodService {
     }
     private void stopRepeat() { repeating = false; handler.removeCallbacks(repeatDelete); }
     private void space() {
+        cancelVoice(); selecting = false;
         if (!composing.isEmpty()) {
             List<PinyinEngine.Candidate> list = matches();
             if (list.isEmpty()) commitRaw(); else select(list.get(0));
         } else type(" ");
     }
     private void enter() {
+        cancelVoice(); selecting = false;
         commitRaw();
         InputConnection ic = getCurrentInputConnection();
         if (ic == null) return;
@@ -316,6 +364,219 @@ public final class QingyuImeService extends InputMethodService {
             default: return "换行";
         }
     }
+
+    private Button headerButton(String label, int width, Runnable action) {
+        Button button = key(label, false);
+        button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
+        button.setOnClickListener(v -> action.run());
+        header.addView(button, new LinearLayout.LayoutParams(dp(width), -1));
+        return button;
+    }
+    private void notifyUser(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+    private void openPanel(String panelName) {
+        cancelVoice(); commitRaw(); stopRepeat();
+        toolPanel = toolPanel.equals(panelName) ? "" : panelName;
+        drawKeys(); refreshCandidates();
+    }
+    private void returnToKeyboard() {
+        toolPanel = ""; selecting = false;
+        drawKeys(); refreshCandidates();
+    }
+    private void drawEditor() {
+        LinearLayout arrows = row();
+        add(arrows, "←", 1, false, () -> moveCursor(KeyEvent.KEYCODE_DPAD_LEFT)).setContentDescription("光标左移");
+        add(arrows, "↑", 1, false, () -> moveCursor(KeyEvent.KEYCODE_DPAD_UP)).setContentDescription("光标上移");
+        add(arrows, "↓", 1, false, () -> moveCursor(KeyEvent.KEYCODE_DPAD_DOWN)).setContentDescription("光标下移");
+        add(arrows, "→", 1, false, () -> moveCursor(KeyEvent.KEYCODE_DPAD_RIGHT)).setContentDescription("光标右移");
+        LinearLayout selection = row();
+        add(selection, selecting ? "选择中" : "选择", 1, selecting, () -> {
+            selecting = !selecting;
+            if (selecting) notifyUser("选择已开启，按方向键扩大或缩小选区");
+            drawKeys();
+        });
+        add(selection, "全选", 1, false, () -> editorAction(android.R.id.selectAll));
+        add(selection, "复制", 1, false, () -> editorAction(android.R.id.copy)).setEnabled(!password);
+        LinearLayout actions = row();
+        add(actions, "剪切", 1, false, () -> editorAction(android.R.id.cut)).setEnabled(!password);
+        add(actions, "粘贴", 1, false, this::pasteClipboard);
+        add(actions, "取消选择", 1, false, this::collapseSelection);
+        LinearLayout last = row();
+        add(last, "剪贴板", 1, false, () -> openPanel("clipboard"));
+        add(last, "⌫", 1, false, this::backspace);
+        add(last, "返回键盘", 1.5f, true, this::returnToKeyboard);
+    }
+    private void moveCursor(int code) {
+        cancelVoice(); commitRaw();
+        InputConnection ic = getCurrentInputConnection();
+        if (ic == null) return;
+        int meta = selecting ? KeyEvent.META_SHIFT_ON | KeyEvent.META_SHIFT_LEFT_ON : 0;
+        long now = SystemClock.uptimeMillis();
+        int flags = KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE;
+        boolean handled = ic.sendKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, code, 0, meta,
+                android.view.KeyCharacterMap.VIRTUAL_KEYBOARD, 0, flags));
+        ic.sendKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, code, 0, meta,
+                android.view.KeyCharacterMap.VIRTUAL_KEYBOARD, 0, flags));
+        if (!handled) notifyUser("当前输入框不支持方向键移动");
+    }
+    private void collapseSelection() {
+        selecting = false;
+        InputConnection ic = getCurrentInputConnection();
+        if (ic != null && selectionEnd >= 0) ic.setSelection(selectionEnd, selectionEnd);
+        drawKeys();
+    }
+    private void editorAction(int action) {
+        cancelVoice(); commitRaw();
+        if (password && (action == android.R.id.copy || action == android.R.id.cut)) {
+            notifyUser("密码框不提供复制或剪切"); return;
+        }
+        InputConnection ic = getCurrentInputConnection();
+        if (ic == null) return;
+        if ((action == android.R.id.copy || action == android.R.id.cut)) {
+            CharSequence selected = ic.getSelectedText(0);
+            if (selected == null || selected.length() == 0) {
+                notifyUser("请先选择文字"); return;
+            }
+        }
+        if (!ic.performContextMenuAction(action)) notifyUser("当前输入框不支持此编辑操作");
+        selecting = false;
+        if (!toolPanel.isEmpty()) drawKeys();
+    }
+    private String readClipboardText() {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        try {
+            ClipData clip = clipboard == null ? null : clipboard.getPrimaryClip();
+            if (clip == null || clip.getItemCount() == 0) return null;
+            // Plain/HTML text only. Never dereference a clipboard URI or intent.
+            CharSequence text = clip.getItemAt(0).getText();
+            return text == null ? null : text.toString();
+        } catch (SecurityException ex) { return null; }
+    }
+    private void pasteClipboard() {
+        cancelVoice(); commitRaw();
+        InputConnection ic = getCurrentInputConnection();
+        if (ic == null) return;
+        // Fetch on explicit paste, so a changed system clipboard is not replaced by a stale preview.
+        String text = readClipboardText();
+        if (text == null || text.isEmpty()) { notifyUser("剪贴板没有可粘贴的文字"); return; }
+        if (!ic.commitText(text, 1)) notifyUser("当前输入框无法粘贴");
+        selecting = false;
+        if (!toolPanel.isEmpty()) drawKeys();
+    }
+    private void drawClipboard() {
+        ScrollView scroll = new ScrollView(this);
+        TextView preview = new TextView(this);
+        String text = password ? null : readClipboardText();
+        preview.setText(password ? "密码框不显示剪贴板预览，可按粘贴输入。" :
+            (text == null || text.isEmpty() ? "剪贴板暂无文字。复制文字后，点击刷新。" :
+                text.substring(0, Math.min(text.length(), 4000)) + (text.length() > 4000 ? "\n…预览已截断，粘贴保留全文" : "")));
+        preview.setTextColor(Color.rgb(226, 232, 240));
+        preview.setTextSize(TypedValue.COMPLEX_UNIT_DIP, sizing.compact ? 14 : 17);
+        preview.setPadding(dp(12), dp(6), dp(12), dp(6));
+        scroll.addView(preview);
+        rows.addView(scroll, new LinearLayout.LayoutParams(-1, dp(sizing.row * 2)));
+        LinearLayout actions = row();
+        add(actions, "粘贴", 1, true, this::pasteClipboard);
+        add(actions, "刷新", 1, false, this::drawKeys);
+        add(actions, "复制选中", 1.5f, false, () -> editorAction(android.R.id.copy)).setEnabled(!password);
+        LinearLayout last = row();
+        add(last, "光标编辑", 1, false, () -> openPanel("edit"));
+        add(last, "返回键盘", 1, true, this::returnToKeyboard);
+    }
+
+    private void toggleVoice() {
+        if (recognizer != null) {
+            voiceStatus = "识别中…"; refreshCandidates();
+            try { recognizer.stopListening(); }
+            catch (RuntimeException ex) { cancelVoice(); notifyUser("语音服务不可用，请重试"); }
+            return;
+        }
+        if (password) { notifyUser("密码框不启用语音"); return; }
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            notifyUser("未找到系统语音识别服务，请先安装或启用语音服务"); return;
+        }
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            startActivity(new Intent(this, VoicePermissionActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            return;
+        }
+        commitRaw(); selecting = false;
+        InputConnection target = getCurrentInputConnection();
+        if (target == null) return;
+        final long session = voiceSession.start(target);
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= 31 && SpeechRecognizer.isOnDeviceRecognitionAvailable(this))
+                recognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(this);
+            else recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            recognizer.setRecognitionListener(new RecognitionListener() {
+                private boolean current() { return voiceSession.accepts(session, getCurrentInputConnection()) && isInputViewShown(); }
+                @Override public void onReadyForSpeech(Bundle params) {
+                    if (current()) { voiceStatus = "请说话，点停止结束"; refreshCandidates(); }
+                }
+                @Override public void onBeginningOfSpeech() { }
+                @Override public void onRmsChanged(float rmsdB) { }
+                @Override public void onBufferReceived(byte[] buffer) { }
+                @Override public void onEndOfSpeech() {
+                    if (current()) { voiceStatus = "识别中…"; refreshCandidates(); }
+                }
+                @Override public void onError(int error) {
+                    if (!voiceSession.accepts(session, getCurrentInputConnection())) return;
+                    cancelVoice(); notifyUser(speechError(error));
+                }
+                @Override public void onResults(Bundle results) {
+                    if (!current()) return;
+                    java.util.ArrayList<String> texts = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                    cancelVoice();
+                    if (texts == null || texts.isEmpty() || texts.get(0).trim().isEmpty()) {
+                        notifyUser("未识别到文字，请重试"); return;
+                    }
+                    if (target == getCurrentInputConnection()) target.commitText(texts.get(0), 1);
+                }
+                @Override public void onPartialResults(Bundle partial) {
+                    // Partial transcripts are never inserted or saved.
+                }
+                @Override public void onEvent(int eventType, Bundle params) { }
+            });
+            voiceStatus = "正在启动…";
+            voiceButton.setText("停止"); refreshCandidates();
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, chinese ? "zh-CN" : "en-US");
+            intent.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true);
+            intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+            intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
+            handler.postDelayed(voiceTimeout, 30000);
+            recognizer.startListening(intent);
+        } catch (RuntimeException ex) {
+            cancelVoice(); notifyUser("语音启动失败，请检查麦克风权限及系统语音服务");
+        }
+    }
+    private void cancelVoice() {
+        voiceSession.cancel();
+        handler.removeCallbacks(voiceTimeout);
+        SpeechRecognizer old = recognizer;
+        recognizer = null;
+        if (old != null) {
+            try { old.cancel(); } catch (RuntimeException ignored) { }
+            try { old.destroy(); } catch (RuntimeException ignored) { }
+            voiceStatus = "";
+            if (voiceButton != null) voiceButton.setText("语音");
+            refreshCandidates();
+        }
+    }
+    private String speechError(int code) {
+        switch (code) {
+            case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS: return "请允许麦克风权限后重试";
+            case SpeechRecognizer.ERROR_NO_MATCH: return "没有识别到文字，请重试";
+            case SpeechRecognizer.ERROR_SPEECH_TIMEOUT: return "未检测到说话声音";
+            case SpeechRecognizer.ERROR_NETWORK:
+            case SpeechRecognizer.ERROR_NETWORK_TIMEOUT: return "语音服务网络异常，请检查网络或离线语言包";
+            case SpeechRecognizer.ERROR_RECOGNIZER_BUSY: return "语音服务正忙，请稍后再试";
+            case SpeechRecognizer.ERROR_AUDIO: return "无法使用麦克风，请检查是否被其他应用占用";
+            default: return "语音识别失败（" + code + "），请检查语音服务或语言包";
+        }
+    }
+
     private Button key(String text, boolean accent) {
         Button b = new Button(this);
         b.setText(text); b.setAllCaps(false);
@@ -360,7 +621,10 @@ public final class QingyuImeService extends InputMethodService {
         candidateScroll.getLayoutParams().height = dp(sizing.candidates);
         layoutToggle.setText(nineKey ? "切换 26 键" : "切换九宫格");
         layoutToggle.setVisibility(chinese && !password && !symbols ? View.VISIBLE : View.GONE);
+        voiceButton.setEnabled(!password);
         rows.removeAllViews();
+        if ("edit".equals(toolPanel)) { drawEditor(); return; }
+        if ("clipboard".equals(toolPanel)) { drawClipboard(); return; }
         if (symbols) {
             letters("1234567890"); letters("@#￥%&*()-+"); letters("/：；！？.,=_");
         } else if (usingNineKey()) {
@@ -378,8 +642,8 @@ public final class QingyuImeService extends InputMethodService {
             letters("qwertyuiop"); letters("asdfghjkl"); letters("zxcvbnm");
         }
         LinearLayout last = row();
-        add(last, symbols ? "ABC" : "123", 1.2f, false, () -> { commitRaw(); symbols = !symbols; drawKeys(); });
-        add(last, chinese ? "中" : "EN", 1, false, () -> { commitRaw(); chinese = !chinese && !password; shifted = false; drawKeys(); refreshCandidates(); });
+        add(last, symbols ? "ABC" : "123", 1.2f, false, () -> { cancelVoice(); commitRaw(); symbols = !symbols; drawKeys(); });
+        add(last, chinese ? "中" : "EN", 1, false, () -> { cancelVoice(); commitRaw(); chinese = !chinese && !password; shifted = false; drawKeys(); refreshCandidates(); });
         if (!chinese && !symbols) add(last, shifted ? "⇧" : "↑", .8f, false, () -> { shifted = !shifted; drawKeys(); });
         Button space = add(last, "空格", 2.5f, false, this::space);
         space.setOnLongClickListener(v -> { ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker(); return true; });
